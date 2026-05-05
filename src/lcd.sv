@@ -1,0 +1,51 @@
+module lcd (
+    input  logic pclk,
+    output logic LCD_DEN,
+    output logic [4:0] LCD_R,
+    output logic [5:0] LCD_G,
+    output logic [4:0] LCD_B
+);
+
+localparam width = 480;
+localparam height = 272;
+localparam xBuffer  = 525;
+localparam yBuffer  = 285;
+
+logic [9:0] x = 0;
+logic [8:0] y = 0;
+
+always_ff @(posedge pclk) begin
+    if (x == xBuffer - 1) begin
+        x <= 0;
+        if (y == yBuffer - 1)
+            y <= 0;
+        else
+            y <= y + 1;
+    end else begin
+        x <= x + 1;
+    end
+end
+
+assign LCD_DEN = (x < width) && (y < height);
+
+always_ff @(posedge pclk) begin
+    if (!LCD_DEN) begin
+        LCD_R <= 0;
+        LCD_G <= 0;
+        LCD_B <= 0;
+    end else if (x < 160) begin
+        LCD_R <= 5'd31;
+        LCD_G <= 6'd0;
+        LCD_B <= 5'd0;
+    end else if (x < 320) begin
+        LCD_R <= 5'd0;
+        LCD_G <= 6'd63;
+        LCD_B <= 5'd0;
+    end else begin
+        LCD_R <= 5'd0;
+        LCD_G <= 6'd0;
+        LCD_B <= 5'd31;
+    end
+end
+
+endmodule
